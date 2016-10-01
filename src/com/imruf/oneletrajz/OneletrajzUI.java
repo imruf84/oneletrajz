@@ -1,14 +1,15 @@
-package com.example.oneletrajz;
+package com.imruf.oneletrajz;
+
+import java.sql.SQLException;
 
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -23,17 +24,23 @@ public class OneletrajzUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
+		
+		try {
+			ConnectionManager.createConnection();
+		} catch (SQLException e) {
+			Notification.show("Hiba az adatbázishoz való kapcsolódás során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
+		}
+		final JDBCConnectionPool connection = ConnectionManager.getConnectionPool();
+		
 		final VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(true);
+		layout.setMargin(false);
+		layout.setSizeFull();
 		setContent(layout);
 
-		Button button = new Button("Click Me");
-		button.addClickListener(new Button.ClickListener() {
-			public void buttonClick(ClickEvent event) {
-				layout.addComponent(new Label("Thank you for clicking"));
-			}
-		});
-		layout.addComponent(button);
+		MembersListPanel mlp = new MembersListPanel(connection);
+		layout.addComponent(new MainMenuPanel(mlp));
+		layout.addComponent(mlp);
+		layout.setExpandRatio(mlp, 1.0f);		
 	}
 
 }
