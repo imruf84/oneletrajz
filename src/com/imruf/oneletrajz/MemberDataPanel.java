@@ -1,6 +1,11 @@
 package com.imruf.oneletrajz;
 
+import java.sql.SQLException;
+
+import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
@@ -35,10 +40,27 @@ public class MemberDataPanel extends Panel {
 		setSizeUndefined();
 		
 		VerticalLayout vl = new VerticalLayout();
+		vl.setSizeFull();
 		vl.setMargin(true);
 		setContent(vl);
 		
-		vl.addComponent(new PersonalDataForm(getMemberId()));
+		try {
+			vl.addComponent(new PersonalDataForm(getMemberId()));
+		} catch (SQLException e) {
+			Notification.show(e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
+		}
+		
+		HorizontalLayout buttonsLayout = new HorizontalLayout();
+		buttonsLayout.setSpacing(true);
+		buttonsLayout.setSizeFull();
+		
+		Button okButton = new Button("Mentés");
+		buttonsLayout.addComponent(okButton);
+		
+		Button cancelButton = new Button("Mégsem");
+		buttonsLayout.addComponent(cancelButton);
+		
+		vl.addComponent(buttonsLayout);
 	}
 
 	public MODE getMode() {

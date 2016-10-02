@@ -67,7 +67,7 @@ public class MembersListPanel extends Panel {
 	public final void updateMembersList() {
 		
 		FreeformQuery query = new FreeformQuery(
-				"SELECT ID, DECODE(NEV_ELOTAG,'','',NEV_ELOTAG||' ')||VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY " + 
+				"SELECT ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY " + 
 				" FROM SZEMELYEK ORDER BY NEV", ConnectionManager.getConnectionPool(), "ID");
 		try {
 
