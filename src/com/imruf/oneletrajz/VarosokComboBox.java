@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 
 /**

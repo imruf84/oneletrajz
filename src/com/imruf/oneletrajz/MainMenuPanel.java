@@ -45,13 +45,49 @@ public class MainMenuPanel extends HorizontalLayout {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				
-				MemberDataWindow mdw = new MemberDataWindow(null);
+				new MemberDataWindow(null) {
+					public void afterInsert(Object newID) {
+						getMembersListPanel().updateMembersList();
+						getMembersListPanel().setSelectedItem(newID);
+					}
+					public void afterUpdate(Object id){}
+					public Object toInsert(){return -1;}
+					public void toUpdate(){}
+				};
 				
 			}
 		});
 		addComponent(ujOneletrajz);
 		
+		Button modositOneletrajz = new Button("Módosít");
+		modositOneletrajz.addClickListener(new ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				// Kijelölt sor azonosítójának a lekérdezése.
+				Object ID = getMembersListPanel().getSelectedId();
+				
+				// Ha nincs kijelölt elem, akkor jelezzük.
+				if (null == ID) {
+					Notification.show("Nincs kijelölt önéletrajz!", Notification.Type.ERROR_MESSAGE);
+					return;
+				}
+				
+				// Adatok megjelenítése.
+				new MemberDataWindow(ID) {
+					public void afterInsert(Object newID) {}
+					public void afterUpdate(Object id){
+						getMembersListPanel().updateMembersList();
+						getMembersListPanel().setSelectedItem(id);
+					}
+					public Object toInsert(){return -1;}
+					public void toUpdate(){}
+				};
+			}
+		});
+		addComponent(modositOneletrajz);
+		
 		Button torolOneletrajz = new Button("Kijelölt önéletrajz törlése");
+		torolOneletrajz.addStyleName("danger");
 		torolOneletrajz.addClickListener(new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -89,6 +125,7 @@ public class MainMenuPanel extends HorizontalLayout {
 		});
 		
 		addComponent(torolOneletrajz);
+		setExpandRatio(torolOneletrajz, 1.0f);
 	}
 	
 }

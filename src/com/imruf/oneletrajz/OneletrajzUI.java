@@ -37,7 +37,21 @@ public class OneletrajzUI extends UI {
 		layout.setSizeFull();
 		setContent(layout);
 
-		MembersListPanel mlp = new MembersListPanel(connection);
+		MembersListPanel mlp = new MembersListPanel(connection) {
+			public void onDoubleClick(Object id) {
+				
+				// Adatok megjelenítése.
+				new MemberDataWindow(id) {
+					public void afterInsert(Object newID) {}
+					public void afterUpdate(Object id){
+						updateMembersList();
+						setSelectedItem(id);
+					}
+					public Object toInsert(){return -1;}
+					public void toUpdate(){}
+				};
+			}
+		};
 		layout.addComponent(new MainMenuPanel(mlp));
 		layout.addComponent(mlp);
 		layout.setExpandRatio(mlp, 1.0f);		

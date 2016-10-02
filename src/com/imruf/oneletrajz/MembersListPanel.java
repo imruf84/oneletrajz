@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
@@ -16,7 +17,7 @@ import com.vaadin.ui.Table;
  *
  */
 @SuppressWarnings("serial")
-public class MembersListPanel extends Panel {
+public abstract class MembersListPanel extends Panel {
 	
 	private Table membersTable;
 
@@ -34,9 +35,19 @@ public class MembersListPanel extends Panel {
 	/**
 	 * Komponens inicializálása.
 	 */
+	@SuppressWarnings("deprecation")
 	private final void initComponents() {
 		
 		membersTable = new Table();
+		
+		membersTable.addListener(new ItemClickEvent.ItemClickListener() {
+            public void itemClick(ItemClickEvent event) {
+                if (event.isDoubleClick()) {
+                	onDoubleClick(getSelectedId());
+                }
+            }
+        });
+		
 		membersTable.setColumnHeaderMode(Table.ColumnHeaderMode.EXPLICIT_DEFAULTS_ID);
 		setContent(membersTable);
 		membersTable.setSizeFull();
@@ -87,5 +98,7 @@ public class MembersListPanel extends Panel {
 			Notification.show("Hiba az adatok lekérdezése során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
 		}
 	}
+	
+	public abstract void onDoubleClick(Object id);
 	
 }

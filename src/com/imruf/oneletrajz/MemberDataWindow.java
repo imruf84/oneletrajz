@@ -10,7 +10,7 @@ import com.vaadin.ui.Window;
  * @author imruf84
  */
 @SuppressWarnings("serial")
-public class MemberDataWindow extends Window {
+public abstract class MemberDataWindow extends Window implements SQLInsertable, SQLUpdateable {
 	
 	private final MemberDataPanel mdp;
 	
@@ -21,7 +21,21 @@ public class MemberDataWindow extends Window {
 	 */
 	public MemberDataWindow(Object id) {
 		
-		this.mdp = new MemberDataPanel(id);
+		final MemberDataWindow mdw = this;
+		
+		this.mdp = new MemberDataPanel(id) {
+			public void afterInsert(Object newID) {
+				mdw.close();
+				mdw.afterInsert(newID);
+			}
+			public void afterUpdate(Object id) {
+				mdw.close();
+				mdw.afterUpdate(id);				
+			}
+			public void onCancel() {
+				mdw.close();
+			}
+		};
 		initComponents();
 	}
 	
