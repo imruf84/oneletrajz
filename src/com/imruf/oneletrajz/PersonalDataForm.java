@@ -1,20 +1,20 @@
 package com.imruf.oneletrajz;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.imageio.ImageIO;
 
 import org.imgscalr.Scalr;
@@ -30,8 +30,8 @@ import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.server.FileResource;
-import com.vaadin.server.Resource;
-import com.vaadin.server.StreamResource;
+import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.FormLayout;
@@ -40,6 +40,9 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
+
+import oracle.sql.BLOB;
+
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.StartedEvent;
 import com.vaadin.ui.Upload.StartedListener;
@@ -48,7 +51,7 @@ import com.vaadin.ui.Upload.SucceededListener;
 
 @SuppressWarnings("serial")
 public class PersonalDataForm extends HorizontalLayout implements Validable, SQLInsertable, SQLUpdateable {
-	
+
 	private TextField vezetekNevTF;
 	private TextField keresztNevTF;
 	private VarosokComboBox szuletesiHely;
@@ -56,98 +59,82 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 	private Object id;
 	private Upload fotoUL;
 	private File fotoFile = null;
+	private Embedded fotoImg;
 
 	public PersonalDataForm(Object id) throws SQLException {
 		this.id = id;
 		initComponents();
 	}
-	
+
 	private void initComponents() throws SQLException {
-		
+
 		FormLayout fl = new FormLayout();
 		addComponent(fl);
-		
-		Embedded fotoImg = new Embedded();
+
+		fotoImg = new Embedded();
 		fotoImg.setWidth("100px");
 		fotoImg.setHeight("150px");
 		VerticalLayout vl = new VerticalLayout();
 		vl.setMargin(true);
 		addComponent(vl);
 		vl.addComponent(fotoImg);
-		
+
 		fotoUL = new Upload();
-		
+
 		class ImageUploader implements Receiver, SucceededListener, StartedListener {
-			
+
 			@Override
 			public OutputStream receiveUpload(String filename, String mimeType) {
-				
+
 				FileOutputStream stream = null;
-				
+
 				try {
-					
+
 					// TODO: már létezõ fájl esetén a fájlnév léptetése, vagy egyedi mappába rakása
-		            fotoFile = new File("./uploads/" + filename);
-		            stream = new FileOutputStream(fotoFile);
-		        } catch (final java.io.FileNotFoundException e) {
-		            Notification.show("Hiba a kép feltöltése során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
-		            return null;
-		        }
-		        return stream;
+					fotoFile = new File(generatePhotoFileName());
+					stream = new FileOutputStream(fotoFile);
+				} catch (final java.io.FileNotFoundException e) {
+					Notification.show("Hiba a kép feltöltése során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
+					return null;
+				}
+				return stream;
 			}
+
 			@Override
 			public void uploadSucceeded(SucceededEvent event) {
-				
-				// Kép átméretezése.
-				//try {
-					//BufferedImage bfi = ImageIO.read(fotoFile);
-					//BufferedImage rimg = Scalr.resize(bfi, Method.ULTRA_QUALITY, Mode.FIT_EXACT, 100, 150);
-					
-					//fotoImg.setSource(new FileResource(fotoFile));
-					
-					AtomicInteger w = new AtomicInteger(0);
-					AtomicInteger h = new AtomicInteger(0);
-				
-					StreamResource resource = new StreamResource(
-					        new StreamResource.StreamSource() {
-					            @Override
-					            public InputStream getStream() {
-					                 try {
-					                	 BufferedImage bfi = ImageIO.read(fotoFile);
-					 					BufferedImage rimg = Scalr.resize(bfi, Method.ULTRA_QUALITY, Mode.FIT_EXACT, 100, 150);
-					                	 //BufferedImage rimg = Scalr.resize(bfi, 100);
-					 					
-					 					//w.set(rimg.getWidth());
-					 					//h.set(rimg.getHeight());
-					                	 fotoImg.setWidth(rimg.getWidth() + "px");
-					 					fotoImg.setHeight(rimg.getHeight() + "px");
-					 					
-					 					ByteArrayOutputStream imagebuffer = new ByteArrayOutputStream();
-					                  ImageIO.write(rimg, "jpg", imagebuffer);
-					                  
-					                  /* Return a stream from the buffer. */
-					                  return new ByteArrayInputStream(imagebuffer.toByteArray());
-					                } catch (IOException e) {
-					                    return null;
-					                }
-					            }
-					        }, "filename.png");
-					
-					//System.out.println(w.get());
- 					//System.out.println(h.get());
-					fotoImg.setSource(resource);
-				//} catch (IOException e) {}
+
+				try {
+					int w = 100;
+					int h = 150;
+					BufferedImage bi = ImageIO.read(fotoFile);
+					bi = Scalr.resize(bi, Method.ULTRA_QUALITY, Mode.AUTOMATIC, w, h);
+
+					BufferedImage bi2 = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+
+					Graphics bg = bi2.getGraphics();
+					bg.setColor(Color.WHITE);
+					bg.fillRect(0, 0, w, h);
+					bg.drawImage(bi, Math.abs((bi.getWidth() - w) / 2), Math.abs((bi.getHeight() - h) / 2), null);
+					bg.dispose();
+					ImageIO.write(bi2, "jpg", fotoFile);
+					fotoImg.setSource(new FileResource(fotoFile));
+
+				} catch (IOException e) {
+					Notification.show("Hiba a kép feltöltése során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
+				}
+
 			}
+
 			@Override
 			public void uploadStarted(StartedEvent event) {
 				if (!event.getMIMEType().toLowerCase().endsWith("jpeg")) {
 					Notification.show("Kizárólag jpeg kiterjesztésû fájlok tölthetõek fel!", Notification.Type.ERROR_MESSAGE);
 					fotoUL.interruptUpload();
 				}
-				
+
 			}
 		}
-		
+
 		ImageUploader iul = new ImageUploader();
 		fotoUL.setCaption("Fotó:");
 		fotoUL.setImmediate(true);
@@ -156,49 +143,56 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 		fotoUL.addStartedListener(iul);
 		fotoUL.setButtonCaption("Kép kiválasztása...");
 		fl.addComponent(fotoUL);
-		
-		
+
 		vezetekNevTF = new TextField();
 		vezetekNevTF.setCaption("Vezetéknév:");
 		vezetekNevTF.setMaxLength(20);
 		vezetekNevTF.setRequired(true);
 		vezetekNevTF.setRequiredError("Vezetéknév megadása kötelezõ!");
-		vezetekNevTF.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ \\-.]{1,20}", true, "Vezetéknév formátuma nem megfelelõ!"));
+		vezetekNevTF.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ \\-.]{1,20}", true,
+				"Vezetéknév formátuma nem megfelelõ!"));
 		vezetekNevTF.setWidth("20em");
 		fl.addComponent(vezetekNevTF);
-		
+
 		keresztNevTF = new TextField();
 		keresztNevTF.setCaption("Keresztnév:");
 		keresztNevTF.setMaxLength(20);
 		keresztNevTF.setRequired(true);
 		keresztNevTF.setRequiredError("Keresztnév megadása kötelezõ!");
-		keresztNevTF.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ \\-.]{1,20}", true, "Keresztnév formátuma nem megfelelõ!"));
+		keresztNevTF.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ \\-.]{1,20}", true,
+				"Keresztnév formátuma nem megfelelõ!"));
 		keresztNevTF.setWidth("20em");
 		fl.addComponent(keresztNevTF);
-		
+
 		szuletesiHely = new VarosokComboBox();
 		szuletesiHely.setCaption("Születési hely:");
 		szuletesiHely.setNullSelectionAllowed(false);
 		szuletesiHely.setRequired(true);
 		szuletesiHely.setRequiredError("Születési hely megadása kötelezõ!");
-		szuletesiHely.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ]{1,30}", true, "Születési hely formátuma nem megfelelõ!"));
+		szuletesiHely.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ]{1,30}", true,
+				"Születési hely formátuma nem megfelelõ!"));
 		fl.addComponent(szuletesiHely);
-		
+
 		szuletesiIdo = new DateField();
 		szuletesiIdo.setCaption("Születési idõ:");
 		szuletesiIdo.setRequired(true);
 		szuletesiIdo.setRequiredError("Születési idõ megadása kötelezõ!");
 		szuletesiIdo.addValidator(new NullValidator("Születési idõ megadása kötelezõ!", false));
 		fl.addComponent(szuletesiIdo);
-		
+
 		// Azonosító esetén kitöltjük adatokkal az ûrlapot.
 		fillFieldsById();
 	}
+
+	private String generatePhotoFileName() {
+		return VaadinService.getCurrent().getBaseDirectory().getAbsolutePath() + "/" + VaadinSession.getCurrent().getSession().getId() + ".jpg";
+	}
 	
 	private void fillFieldsById() throws SQLException {
-		
-		if (null == id) return;
-		
+
+		if (null == id)
+			return;
+
 		// Adatok lekérdezése.
 		FreeformQuery query = new FreeformQuery("SELECT * FROM SZEMELYEK", ConnectionManager.getConnectionPool(), "ID");
 		SQLContainer container = new SQLContainer(query);
@@ -209,30 +203,45 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 		keresztNevTF.setValue((String) data.getItemProperty("KERESZT_NEV").getValue());
 		szuletesiHely.setValue((String) data.getItemProperty("SZULETESI_HELY").getValue());
 		try {
-			szuletesiIdo.setValue(new SimpleDateFormat("yyyy.MM.dd").parse(((String)data.getItemProperty("SZULETESI_IDO").getValue())));
-		} catch (ReadOnlyException | ConversionException | ParseException e) {
+			szuletesiIdo.setValue(new SimpleDateFormat("yyyy.MM.dd.").parse(((String) data.getItemProperty("SZULETESI_IDO").getValue())));
+			
+			BLOB image = (BLOB)data.getItemProperty("FOTO").getValue();
+			if (null != image) {
+				BufferedImage bi = ImageIO.read(image.getBinaryStream());
+				fotoFile = new File(generatePhotoFileName());
+				ImageIO.write(bi, "jpg", fotoFile);
+				fotoImg.setSource(new FileResource(fotoFile));
+			}
+		} catch (ReadOnlyException | ConversionException | ParseException | IOException e) {
 		}
 	}
-	
+
 	@Override
 	public boolean isValid() {
 		return vezetekNevTF.isValid() && keresztNevTF.isValid() && szuletesiHely.isValid() && szuletesiIdo.isValid();
 	}
 
 	@Override
-	public void toUpdate() throws SQLException {
+	public void toUpdate() throws SQLException, FileNotFoundException {
 		Connection c = ConnectionManager.getConnectionPool().reserveConnection();
-		PreparedStatement ps = c.prepareStatement(
-				"UPDATE SZEMELYEK SET "
-						+ "VEZETEK_NEV='" + vezetekNevTF.getValue() + "',"
-						+ "KERESZT_NEV='" + keresztNevTF.getValue() + "',"
-						+ "SZULETESI_HELY='" + szuletesiHely.getValue() + "',"
-						+ "SZULETESI_IDO='" + new SimpleDateFormat("yyyy.MM.dd").format(szuletesiIdo.getValue()) + "'"
-						+ " WHERE ID=" + id);
+		
+		PreparedStatement ps = c.prepareStatement("UPDATE SZEMELYEK SET VEZETEK_NEV=?,KERESZT_NEV=?,SZULETESI_HELY=?,SZULETESI_IDO=?,FOTO=? WHERE ID=" + id);
+		
+		ps.setString(1, vezetekNevTF.getValue());
+		ps.setString(2, keresztNevTF.getValue());
+		ps.setString(3, szuletesiHely.getValue().toString());
+		ps.setString(4, new SimpleDateFormat("yyyy.MM.dd.").format(szuletesiIdo.getValue()));
+		if (fotoFile != null) {
+			ps.setBinaryStream(5, new FileInputStream(fotoFile), (int)fotoFile.length());
+		} else {
+			ps.setNull(5, Types.BLOB);
+		}
+		
 		ps.executeUpdate();
 		c.commit();
-		
+
 		ps.close();
+		c.close();
 	}
 
 	@Override
@@ -240,22 +249,30 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 	}
 
 	@Override
-	public Object toInsert() throws SQLException {
-		
+	public Object toInsert() throws SQLException, FileNotFoundException {
+
 		Connection c = ConnectionManager.getConnectionPool().reserveConnection();
-		PreparedStatement ps = c.prepareStatement(
-				"INSERT INTO SZEMELYEK (VEZETEK_NEV,KERESZT_NEV,SZULETESI_HELY,SZULETESI_IDO) VALUES ("
-						+ "'" + vezetekNevTF.getValue() + "',"
-						+ "'" + keresztNevTF.getValue() + "',"
-						+ "'" + szuletesiHely.getValue() + "',"
-						+ "'" + new SimpleDateFormat("yyyy.MM.dd").format(szuletesiIdo.getValue()) + "'"
-						+ ")", 
-						new String[] { "ID" });
-		ps.executeUpdate();
+				
+		PreparedStatement ps = c.prepareStatement("INSERT INTO SZEMELYEK (VEZETEK_NEV,KERESZT_NEV,SZULETESI_HELY,SZULETESI_IDO,FOTO) VALUES (?,?,?,?,?)", new String[] { "ID" });
 		
+		ps.setString(1, vezetekNevTF.getValue());		
+		ps.setString(2, keresztNevTF.getValue());
+		ps.setString(3, szuletesiHely.getValue().toString());
+		ps.setString(4, new SimpleDateFormat("yyyy.MM.dd.").format(szuletesiIdo.getValue()));
+		if (fotoFile != null) {
+			ps.setBinaryStream(5, new FileInputStream(fotoFile), (int)fotoFile.length());
+		} else {
+			ps.setNull(5, Types.BLOB);
+		}
+		
+		ps.executeUpdate();
 		c.commit();
 		
-		return ps.getGeneratedKeys().next() ? ConnectionManager.objectToRowId(ps.getGeneratedKeys().getInt(1)) : -1;
+		Object newID = ps.getGeneratedKeys().next() ? ConnectionManager.objectToRowId(ps.getGeneratedKeys().getInt(1)) : -1;
+		
+		c.close();
+
+		return newID;
 	}
 
 	@Override

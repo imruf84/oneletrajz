@@ -1,5 +1,6 @@
 package com.imruf.oneletrajz;
 
+import java.io.FileNotFoundException;
 import java.sql.SQLException;
 
 import com.vaadin.ui.Button;
@@ -79,7 +80,7 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 						return;
 					}
 					
-				} catch (SQLException e) {
+				} catch (SQLException | FileNotFoundException e) {
 					Notification.show("Hiba az adatok tárolása során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
 				}
 			}
@@ -120,13 +121,13 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 		return personalDataForm.isValid();
 	}
 	
-	public Object toInsert() throws SQLException {
+	public Object toInsert() throws SQLException, FileNotFoundException {
 		Object newID = personalDataForm.toInsert();
 		afterInsert(newID);
 		return newID;
 	}
 	
-	public void toUpdate() throws SQLException {
+	public void toUpdate() throws SQLException, FileNotFoundException {
 		personalDataForm.toUpdate();
 		afterUpdate(id);
 	}
