@@ -107,7 +107,7 @@ public class MainMenuPanel extends HorizontalLayout {
 						if (dialog.isConfirmed()) {
 							// Törlés.
 							try {
-								Connection c = ConnectionManager.getConnectionPool().reserveConnection();
+								Connection c = ConnectionManager.getConnection();
 								PreparedStatement ps = c.prepareStatement("DELETE FROM SZEMELYEK WHERE ID=" + ID.toString());
 								ps.executeQuery();
 								c.commit();

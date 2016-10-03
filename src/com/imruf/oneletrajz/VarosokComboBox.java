@@ -25,7 +25,7 @@ public class VarosokComboBox extends MyComboBox {
 		setFilteringMode(FilteringMode.CONTAINS);
 		setNewItemsAllowed(true);
 		
-		Connection c = ConnectionManager.getConnectionPool().reserveConnection();
+		Connection c = ConnectionManager.getConnection();
 		PreparedStatement ps = c.prepareStatement("SELECT * FROM VAROSOK ORDER BY NEV");
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {

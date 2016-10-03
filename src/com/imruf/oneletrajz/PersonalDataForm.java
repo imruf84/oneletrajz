@@ -44,13 +44,11 @@ import com.vaadin.ui.VerticalLayout;
 import oracle.sql.BLOB;
 
 import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.Upload.StartedEvent;
-import com.vaadin.ui.Upload.StartedListener;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 
 @SuppressWarnings("serial")
-public class PersonalDataForm extends HorizontalLayout implements Validable, SQLInsertable, SQLUpdateable {
+public class PersonalDataForm extends HorizontalLayout implements Validable, SQLInsertable, SQLUpdateable, Closable {
 
 	private TextField vezetekNevTF;
 	private TextField keresztNevTF;
@@ -81,23 +79,27 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 		fotoUL = new Upload();
 
-		class ImageUploader implements Receiver, SucceededListener, StartedListener {
+		class ImageUploader implements Receiver, SucceededListener {
 
 			@Override
 			public OutputStream receiveUpload(String filename, String mimeType) {
 
-				FileOutputStream stream = null;
-
+				if (!mimeType.toLowerCase().endsWith("jpeg")) {
+					Notification.show("Kizárólag jpeg kiterjesztésû fájlok tölthetõek fel!", Notification.Type.ERROR_MESSAGE);
+					fotoUL.interruptUpload();
+					return new NullOutputStream();
+				}
+				
 				try {
 
 					// TODO: már létezõ fájl esetén a fájlnév léptetése, vagy egyedi mappába rakása
 					fotoFile = new File(generatePhotoFileName());
-					stream = new FileOutputStream(fotoFile);
+					return new FileOutputStream(fotoFile);
 				} catch (final java.io.FileNotFoundException e) {
 					Notification.show("Hiba a kép feltöltése során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
-					return null;
 				}
-				return stream;
+				
+				return new NullOutputStream();
 			}
 
 			@Override
@@ -125,14 +127,6 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 			}
 
-			@Override
-			public void uploadStarted(StartedEvent event) {
-				if (!event.getMIMEType().toLowerCase().endsWith("jpeg")) {
-					Notification.show("Kizárólag jpeg kiterjesztésû fájlok tölthetõek fel!", Notification.Type.ERROR_MESSAGE);
-					fotoUL.interruptUpload();
-				}
-
-			}
 		}
 
 		ImageUploader iul = new ImageUploader();
@@ -140,7 +134,6 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 		fotoUL.setImmediate(true);
 		fotoUL.setReceiver(iul);
 		fotoUL.addSucceededListener(iul);
-		fotoUL.addStartedListener(iul);
 		fotoUL.setButtonCaption("Kép kiválasztása...");
 		fl.addComponent(fotoUL);
 
@@ -186,6 +179,7 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 	private String generatePhotoFileName() {
 		return VaadinService.getCurrent().getBaseDirectory().getAbsolutePath() + "/" + VaadinSession.getCurrent().getSession().getId() + ".jpg";
+		//return "./uploads/" + VaadinSession.getCurrent().getSession().getId() + ".jpg";
 	}
 	
 	private void fillFieldsById() throws SQLException {
@@ -214,6 +208,8 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 			}
 		} catch (ReadOnlyException | ConversionException | ParseException | IOException e) {
 		}
+		
+		
 	}
 
 	@Override
@@ -223,7 +219,7 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 	@Override
 	public void toUpdate() throws SQLException, FileNotFoundException {
-		Connection c = ConnectionManager.getConnectionPool().reserveConnection();
+		Connection c = ConnectionManager.getConnection();
 		
 		PreparedStatement ps = c.prepareStatement("UPDATE SZEMELYEK SET VEZETEK_NEV=?,KERESZT_NEV=?,SZULETESI_HELY=?,SZULETESI_IDO=?,FOTO=? WHERE ID=" + id);
 		
@@ -241,17 +237,17 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 		c.commit();
 
 		ps.close();
-		c.close();
 	}
 
 	@Override
 	public void afterUpdate(Object id) {
+		onClose();
 	}
 
 	@Override
 	public Object toInsert() throws SQLException, FileNotFoundException {
 
-		Connection c = ConnectionManager.getConnectionPool().reserveConnection();
+		Connection c = ConnectionManager.getConnection();
 				
 		PreparedStatement ps = c.prepareStatement("INSERT INTO SZEMELYEK (VEZETEK_NEV,KERESZT_NEV,SZULETESI_HELY,SZULETESI_IDO,FOTO) VALUES (?,?,?,?,?)", new String[] { "ID" });
 		
@@ -269,13 +265,21 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 		c.commit();
 		
 		Object newID = ps.getGeneratedKeys().next() ? ConnectionManager.objectToRowId(ps.getGeneratedKeys().getInt(1)) : -1;
-		
-		c.close();
 
 		return newID;
 	}
 
 	@Override
 	public void afterInsert(Object newID) {
+		onClose();
+	}
+
+	@Override
+	public void onClose() {
+		if (fotoFile != null) {
+			if (fotoFile.exists()) {
+				fotoFile.delete();
+			}
+		}
 	}
 }

@@ -10,7 +10,7 @@ import com.vaadin.ui.Window;
  * @author imruf84
  */
 @SuppressWarnings("serial")
-public abstract class MemberDataWindow extends Window implements SQLInsertable, SQLUpdateable {
+public abstract class MemberDataWindow extends Window implements SQLInsertable, SQLUpdateable, Closable {
 	
 	private final MemberDataPanel mdp;
 	
@@ -27,13 +27,16 @@ public abstract class MemberDataWindow extends Window implements SQLInsertable, 
 			public void afterInsert(Object newID) {
 				mdw.close();
 				mdw.afterInsert(newID);
+				onClose();
 			}
 			public void afterUpdate(Object id) {
 				mdw.close();
-				mdw.afterUpdate(id);				
+				mdw.afterUpdate(id);
+				onClose();
 			}
 			public void onCancel() {
 				mdw.close();
+				onClose();
 			}
 		};
 		initComponents();
@@ -47,8 +50,6 @@ public abstract class MemberDataWindow extends Window implements SQLInsertable, 
 		
 		UI.getCurrent().addWindow(this);
 		setWindowMode(WindowMode.NORMAL);
-		//setWidth("70%");
-		//setHeight("90%");
 		setSizeUndefined();
 		setVisible(true);
 		setModal(true);
@@ -61,6 +62,8 @@ public abstract class MemberDataWindow extends Window implements SQLInsertable, 
 		return mdp;
 	}
 	
-	
+	public void onClose() {
+		mdp.onClose();
+	}
 	
 }

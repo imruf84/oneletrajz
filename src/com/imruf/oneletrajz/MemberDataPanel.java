@@ -17,7 +17,7 @@ import com.vaadin.ui.Button.ClickListener;
  * @author imruf84
  */
 @SuppressWarnings("serial")
-public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQLUpdateable, Validable {
+public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQLUpdateable, Validable, Closable {
 	
 	public static enum MODE {INSERT, MODIFY};
 	
@@ -66,7 +66,7 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 				try {
 					
 					if (!isValid()) {
-						Notification.show("Néhány adat nem megfelelõ!", Notification.Type.ERROR_MESSAGE);
+						Notification.show("Néhány adat nem megfelelõ, vagy hiányzik!", Notification.Type.ERROR_MESSAGE);
 						return;
 					}
 					
@@ -99,7 +99,9 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 		vl.addComponent(buttonsLayout);
 	}
 
-	public abstract void onCancel();
+	public void onCancel() {
+		onClose();
+	}
 	
 	public MODE getMode() {
 		return mode;
@@ -130,5 +132,9 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	public void toUpdate() throws SQLException, FileNotFoundException {
 		personalDataForm.toUpdate();
 		afterUpdate(id);
+	}
+	
+	public void onClose() {
+		personalDataForm.onClose();
 	}
 }

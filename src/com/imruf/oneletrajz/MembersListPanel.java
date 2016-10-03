@@ -3,7 +3,6 @@ package com.imruf.oneletrajz;
 import java.sql.SQLException;
 
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
-import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Notification;
@@ -26,7 +25,7 @@ public abstract class MembersListPanel extends Panel {
 	 * 
 	 * @param connection adatbázis kapcsolat
 	 */
-	public MembersListPanel(final JDBCConnectionPool connection) {
+	public MembersListPanel() {
 		super();
 		setSizeFull();
 		initComponents();
