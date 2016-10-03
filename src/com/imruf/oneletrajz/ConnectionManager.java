@@ -15,24 +15,26 @@ import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
  *
  */
 public class ConnectionManager {
-	
+	/**
+	 * Kapcsolat.
+	 */
 	private static JDBCConnectionPool pool = null;
+	/**
+	 * Kapcsolat.
+	 */
 	private static Connection connection = null;
-	
+
 	/**
 	 * Kapcsolat létrehozása.
 	 * 
 	 * @throws SQLException
 	 */
 	public static void createConnection() throws SQLException {
-		pool = new SimpleJDBCConnectionPool(
-				"oracle.jdbc.OracleDriver",
-				"jdbc:oracle:thin:@localhost:1521:xe", 
-				"ONELETRAJZ", 
-				"12345");
+		pool = new SimpleJDBCConnectionPool("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@localhost:1521:xe",
+				"ONELETRAJZ", "12345");
 		connection = pool.reserveConnection();
 	}
-	
+
 	/**
 	 * Kapcsolat lekérdezése.
 	 * 
@@ -41,7 +43,7 @@ public class ConnectionManager {
 	public static JDBCConnectionPool getConnectionPool() {
 		return pool;
 	}
-	
+
 	/**
 	 * Kapcsolat lekérdezése.
 	 * 
@@ -50,15 +52,16 @@ public class ConnectionManager {
 	public static Connection getConnection() {
 		return connection;
 	}
-	
+
 	/**
 	 * Azonosító létrehozása objektumból.
 	 * 
-	 * @param o objektum
+	 * @param o
+	 *            objektum
 	 * @return azonosító
 	 */
 	public static RowId objectToRowId(final Object o) {
-		return new RowId(new Object[]{new BigDecimal(Integer.parseInt(o.toString()))});
+		return new RowId(new Object[] { new BigDecimal(Integer.parseInt(o.toString())) });
 	}
 
 }

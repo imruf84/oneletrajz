@@ -9,29 +9,31 @@ import com.vaadin.shared.ui.combobox.FilteringMode;
 
 /**
  * Városok neveit tartalmazó legördülõ lista.
+ * 
  * @author imruf84
  */
 @SuppressWarnings("serial")
 public class VarosokComboBox extends MyComboBox {
-	
+
 	/**
 	 * Konstruktor.
 	 * 
-	 * @param connection adatbázis kapcsolat
+	 * @throws SQLException
+	 *             kivétel
 	 */
 	public VarosokComboBox() throws SQLException {
 		setCaption("Város:");
 		setWidth("20em");
 		setFilteringMode(FilteringMode.CONTAINS);
 		setNewItemsAllowed(true);
-		
+
 		Connection c = ConnectionManager.getConnection();
 		PreparedStatement ps = c.prepareStatement("SELECT * FROM VAROSOK ORDER BY NEV");
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 			addItem(rs.getString(1));
 		}
-		
+
 		ps.close();
 	}
 }

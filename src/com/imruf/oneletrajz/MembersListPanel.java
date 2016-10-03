@@ -10,75 +10,81 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 
 /**
- * Felhasználók listájának komponense.
+ * Személyek listájának komponense.
  * 
  * @author imruf84
  *
  */
 @SuppressWarnings("serial")
 public abstract class MembersListPanel extends Panel {
-	
+
+	/**
+	 * Személyek alapadatait megjelenítõ táblázat.
+	 */
 	private Table membersTable;
 
 	/**
 	 * Konstruktor.
-	 * 
-	 * @param connection adatbázis kapcsolat
 	 */
 	public MembersListPanel() {
 		super();
-		setSizeFull();
+
 		initComponents();
 	}
-	
+
 	/**
 	 * Komponens inicializálása.
 	 */
 	@SuppressWarnings("deprecation")
 	private final void initComponents() {
-		
+
+		setSizeFull();
+
 		membersTable = new Table();
-		
+
+		// TODO: lecserélni egy támogatottra
 		membersTable.addListener(new ItemClickEvent.ItemClickListener() {
-            public void itemClick(ItemClickEvent event) {
-                if (event.isDoubleClick()) {
-                	onDoubleClick(getSelectedId());
-                }
-            }
-        });
-		
+			public void itemClick(ItemClickEvent event) {
+				if (event.isDoubleClick()) {
+					onDoubleClick(getSelectedId());
+				}
+			}
+		});
+
 		membersTable.setColumnHeaderMode(Table.ColumnHeaderMode.EXPLICIT_DEFAULTS_ID);
 		setContent(membersTable);
 		membersTable.setSizeFull();
 		updateMembersList();
 	}
-	
+
 	/**
-	 * Kijelölt sor azonosítójának a lekérdezése.
+	 * Kijelölt sorban lébõ személy azonosítójának a lekérdezése.
 	 * 
 	 * @return azonosító
 	 */
 	public Object getSelectedId() {
 		return membersTable.getValue();
 	}
-	
+
 	/**
-	 * Kijelölt elem megadása.
+	 * Kijelölt személy megadása az azonosítója alapján.
 	 * 
-	 * @param id kijelölt elem azonosítója
+	 * @param id
+	 *            kijelölni kívánt személy azonosítója
 	 */
 	public void setSelectedItem(Object id) {
 		membersTable.select(id);
 	}
-	
+
 	/**
-	 * Felhasználók listájának frissítése.
+	 * Személyek listájának a frissítése.
 	 */
 	public final void updateMembersList() {
-		
+
 		FreeformQuery query = new FreeformQuery(
-				"SELECT ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY " + 
-				" FROM SZEMELYEK ORDER BY NEV", ConnectionManager.getConnectionPool(), "ID");
+				"SELECT ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY "
+						+ " FROM SZEMELYEK ORDER BY NEV",
+				ConnectionManager.getConnectionPool(), "ID");
 		try {
 
 			SQLContainer container = new SQLContainer(query);
@@ -92,12 +98,19 @@ public abstract class MembersListPanel extends Panel {
 			membersTable.setColumnHeader("NEV", "Név");
 			membersTable.setColumnHeader("SZULETESI_IDO", "Születési idõ");
 			membersTable.setColumnHeader("SZULETESI_HELY", "Születési hely");
-			
+
 		} catch (SQLException e) {
-			Notification.show("Hiba az adatok lekérdezése során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
+			Notification.show("Hiba az adatok lekérdezése során:\n" + e.getLocalizedMessage(),
+					Notification.Type.ERROR_MESSAGE);
 		}
 	}
-	
+
+	/**
+	 * Táblázat sorára való dupla kattintás eseménye.
+	 * 
+	 * @param id
+	 *            adott sorhoz tartozó személy azonosítója
+	 */
 	public abstract void onDoubleClick(Object id);
-	
+
 }
