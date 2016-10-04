@@ -110,6 +110,14 @@ public class MainMenuPanel extends HorizontalLayout {
 			}
 		});
 		addComponent(modositOneletrajz);
+		
+		Button frissites = new Button("Lista frissítése", new ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				getMembersListPanel().updateMembersList();
+			}
+		});
+		addComponent(frissites);
 
 		Button torolOneletrajz = new Button("Kijelölt önéletrajz törlése");
 		torolOneletrajz.addStyleName("danger");
@@ -153,7 +161,6 @@ public class MainMenuPanel extends HorizontalLayout {
 		});
 
 		addComponent(torolOneletrajz);
-		setExpandRatio(torolOneletrajz, 1.0f);
 	}
 
 }

@@ -45,7 +45,7 @@ public abstract class MemberDataWindow extends Window implements SQLInsertable, 
 				onClose();
 			}
 		};
-
+		
 		initComponents();
 	}
 

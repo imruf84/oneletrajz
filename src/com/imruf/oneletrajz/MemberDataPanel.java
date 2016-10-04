@@ -38,6 +38,10 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	 * Személyes adatok ûrlapja.
 	 */
 	private PersonalDataForm personalDataForm;
+	/**
+	 * Tanulmányok tárolója.
+	 */
+	private TanulmanyokPanel tanulmanyokPanel;
 
 	/**
 	 * Konstruktor.
@@ -68,6 +72,9 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 		try {
 			personalDataForm = new PersonalDataForm(getMemberId());
 			vl.addComponent(personalDataForm);
+			
+			tanulmanyokPanel = new TanulmanyokPanel(getMemberId());
+			vl.addComponent(tanulmanyokPanel);
 		} catch (SQLException e) {
 			Notification.show(e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
 		}
@@ -167,7 +174,7 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	 * @return igaz esetén az ûrlap helyesen van kitöltve
 	 */
 	public boolean isValid() {
-		return personalDataForm.isValid();
+		return personalDataForm.isValid() && tanulmanyokPanel.isValid();
 	}
 
 	/**
@@ -177,6 +184,8 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	 */
 	public Object toInsert() throws SQLException, FileNotFoundException {
 		Object newID = personalDataForm.toInsert();
+		tanulmanyokPanel.setPersonID(newID);
+		tanulmanyokPanel.toInsert();
 		afterInsert(newID);
 		return newID;
 	}
@@ -186,6 +195,7 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	 */
 	public void toUpdate() throws SQLException, FileNotFoundException {
 		personalDataForm.toUpdate();
+		tanulmanyokPanel.toUpdate();
 		afterUpdate(id);
 	}
 
@@ -194,5 +204,6 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	 */
 	public void onClose() {
 		personalDataForm.onClose();
+		tanulmanyokPanel.onClose();
 	}
 }
