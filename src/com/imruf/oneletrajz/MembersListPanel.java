@@ -88,6 +88,8 @@ public abstract class MembersListPanel extends Panel {
 	 */
 	public final void updateMembersList() {
 
+		Object id = getSelectedId();
+		
 		FreeformQuery query = new FreeformQuery(
 				"SELECT * FROM (SELECT ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY, DECODE(LENGTH(FOTO), NULL, '', 'X') AS FOTO_VAN "
 						+ " FROM SZEMELYEK) " + (filter.isEmpty() ? "" : " WHERE ") + filter + " ORDER BY NEV",
@@ -111,6 +113,8 @@ public abstract class MembersListPanel extends Panel {
 			Notification.show("Hiba az adatok lekérdezése során:\n" + e.getLocalizedMessage(),
 					Notification.Type.ERROR_MESSAGE);
 		}
+		
+		setSelectedItem(id);
 	}
 	
 	/**
