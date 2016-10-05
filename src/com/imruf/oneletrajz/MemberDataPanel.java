@@ -7,9 +7,12 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
+import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 
 /**
  * Felhasználó adatainak az ûrlap tárolója.
@@ -42,6 +45,7 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	 * Tanulmányok tárolója.
 	 */
 	private TanulmanyokPanel tanulmanyokPanel;
+	private NyelvtudasPanel nyelvtudasPanel;
 
 	/**
 	 * Konstruktor.
@@ -70,11 +74,28 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 		setContent(vl);
 
 		try {
+			
+			// Személyes adatok.
 			personalDataForm = new PersonalDataForm(getMemberId());
 			vl.addComponent(personalDataForm);
 			
+			TabSheet ts = new TabSheet();
+			ts.addSelectedTabChangeListener(new SelectedTabChangeListener() {
+				@Override
+				public void selectedTabChange(SelectedTabChangeEvent event) {
+					Utils.centerWindows();
+				}
+			});
+			vl.addComponent(ts);
+			
+			// Tanulmányok.
 			tanulmanyokPanel = new TanulmanyokPanel(getMemberId());
-			vl.addComponent(tanulmanyokPanel);
+			ts.addComponent(tanulmanyokPanel);
+			
+			// Nyelvtudás.
+			nyelvtudasPanel = new NyelvtudasPanel(getMemberId());
+			ts.addComponent(nyelvtudasPanel);
+			
 		} catch (SQLException e) {
 			Notification.show(e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
 		}
@@ -186,6 +207,8 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 		Object newID = personalDataForm.toInsert();
 		tanulmanyokPanel.setPersonID(newID);
 		tanulmanyokPanel.toInsert();
+		nyelvtudasPanel.setPersonID(newID);
+		nyelvtudasPanel.toInsert();
 		afterInsert(newID);
 		return newID;
 	}
@@ -196,6 +219,7 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	public void toUpdate() throws SQLException, FileNotFoundException {
 		personalDataForm.toUpdate();
 		tanulmanyokPanel.toUpdate();
+		nyelvtudasPanel.toUpdate();
 		afterUpdate(id);
 	}
 
@@ -205,5 +229,6 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	public void onClose() {
 		personalDataForm.onClose();
 		tanulmanyokPanel.onClose();
+		nyelvtudasPanel.onClose();
 	}
 }

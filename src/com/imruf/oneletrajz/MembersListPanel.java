@@ -82,7 +82,7 @@ public abstract class MembersListPanel extends Panel {
 	public final void updateMembersList() {
 
 		FreeformQuery query = new FreeformQuery(
-				"SELECT ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY "
+				"SELECT ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY, DECODE(LENGTH(FOTO), NULL, '', 'X') AS FOTO_VAN "
 						+ " FROM SZEMELYEK ORDER BY NEV",
 				ConnectionManager.getConnectionPool(), "ID");
 		try {
@@ -94,10 +94,11 @@ public abstract class MembersListPanel extends Panel {
 			membersTable.setSelectable(true);
 			membersTable.setNullSelectionAllowed(false);
 			membersTable.setImmediate(true);
-			membersTable.setVisibleColumns(new Object[] { "NEV", "SZULETESI_IDO", "SZULETESI_HELY" });
+			membersTable.setVisibleColumns(new Object[] { "NEV", "SZULETESI_IDO", "SZULETESI_HELY", "FOTO_VAN" });
 			membersTable.setColumnHeader("NEV", "Név");
 			membersTable.setColumnHeader("SZULETESI_IDO", "Születési idõ");
 			membersTable.setColumnHeader("SZULETESI_HELY", "Születési hely");
+			membersTable.setColumnHeader("FOTO_VAN", "Fotó");
 
 		} catch (SQLException e) {
 			Notification.show("Hiba az adatok lekérdezése során:\n" + e.getLocalizedMessage(),

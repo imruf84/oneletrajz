@@ -102,7 +102,6 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 		FormLayout fl = new FormLayout();
 		addComponent(fl);
-		setCaption("Személyes adatok");
 		setMargin(true);
 
 		fotoImg = new Embedded();

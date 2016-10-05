@@ -25,6 +25,7 @@ public class VarosokComboBox extends MyComboBox {
 		setCaption("Város:");
 		setWidth("20em");
 		setFilteringMode(FilteringMode.CONTAINS);
+		setNullSelectionAllowed(false);
 		setNewItemsAllowed(true);
 
 		Connection c = ConnectionManager.getConnection();
