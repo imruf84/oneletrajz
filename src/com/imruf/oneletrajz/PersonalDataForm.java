@@ -102,7 +102,6 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 		FormLayout fl = new FormLayout();
 		addComponent(fl);
-		setMargin(true);
 
 		fotoImg = new Embedded();
 		fotoImg.setWidth("100px");

@@ -21,6 +21,8 @@ public class OneletrajzUI extends UI {
 	public static class Servlet extends VaadinServlet {
 	}
 
+	private MainMenuPanel mmp;
+
 	@Override
 	protected void init(VaadinRequest request) {
 
@@ -45,8 +47,7 @@ public class OneletrajzUI extends UI {
 					}
 
 					public void afterUpdate(Object id) {
-						updateMembersList();
-						setSelectedItem(id);
+						mmp.refresh(id);
 					}
 
 					public Object toInsert() {
@@ -58,7 +59,9 @@ public class OneletrajzUI extends UI {
 				};
 			}
 		};
-		layout.addComponent(new MainMenuPanel(mlp));
+		
+		mmp = new MainMenuPanel(mlp);
+		layout.addComponent(mmp);
 		layout.addComponent(mlp);
 		layout.setExpandRatio(mlp, 1.0f);
 	}

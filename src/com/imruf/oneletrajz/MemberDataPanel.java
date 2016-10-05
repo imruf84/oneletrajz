@@ -69,7 +69,6 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 		setSizeUndefined();
 
 		VerticalLayout vl = new VerticalLayout();
-		vl.setSizeFull();
 		vl.setMargin(true);
 		setContent(vl);
 
@@ -102,7 +101,7 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 
 		HorizontalLayout buttonsLayout = new HorizontalLayout();
 		buttonsLayout.setSpacing(true);
-		buttonsLayout.setSizeFull();
+		vl.addComponent(buttonsLayout);
 
 		Button okButton = new Button("Mentés");
 		okButton.addStyleName("primary");
@@ -142,8 +141,6 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 			}
 		});
 		buttonsLayout.addComponent(cancelButton);
-
-		vl.addComponent(buttonsLayout);
 	}
 
 	/**

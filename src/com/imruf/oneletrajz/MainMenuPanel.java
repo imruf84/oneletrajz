@@ -6,19 +6,22 @@ import java.sql.SQLException;
 
 import org.vaadin.dialogs.ConfirmDialog;
 
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 @SuppressWarnings("serial")
-public class MainMenuPanel extends HorizontalLayout {
+public class MainMenuPanel extends VerticalLayout {
 
 	/**
 	 * Személyek alapadatait tartalmazó tároló.
 	 */
 	private final MembersListPanel membersPanel;
+	private KeresesPanel keresesPanel;
 
 	/**
 	 * Konstruktor.
@@ -48,18 +51,21 @@ public class MainMenuPanel extends HorizontalLayout {
 	 */
 	private final void initComponents() {
 
-		setMargin(true);
-		setSpacing(true);
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setMargin(true);
+		hl.setSpacing(true);
+		hl.setWidth("100%");
+		
+		addComponent(hl);
 
-		Button ujOneletrajz = new Button("Új önéletrajz");
+		Button ujOneletrajz = new Button("Új létrehozása...");
 		ujOneletrajz.addClickListener(new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
 
 				new MemberDataWindow(null) {
 					public void afterInsert(Object newID) {
-						getMembersListPanel().updateMembersList();
-						getMembersListPanel().setSelectedItem(newID);
+						refresh(newID);
 					}
 
 					public void afterUpdate(Object id) {
@@ -75,9 +81,9 @@ public class MainMenuPanel extends HorizontalLayout {
 
 			}
 		});
-		addComponent(ujOneletrajz);
+		hl.addComponent(ujOneletrajz);
 
-		Button modositOneletrajz = new Button("Módosít");
+		Button modositOneletrajz = new Button("Kijelölt módosítása...");
 		modositOneletrajz.addClickListener(new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -96,8 +102,7 @@ public class MainMenuPanel extends HorizontalLayout {
 					}
 
 					public void afterUpdate(Object id) {
-						getMembersListPanel().updateMembersList();
-						getMembersListPanel().setSelectedItem(id);
+						refresh(id);
 					}
 
 					public Object toInsert() {
@@ -109,17 +114,30 @@ public class MainMenuPanel extends HorizontalLayout {
 				};
 			}
 		});
-		addComponent(modositOneletrajz);
+		hl.addComponent(modositOneletrajz);
 		
 		Button frissites = new Button("Lista frissítése", new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				getMembersListPanel().updateMembersList();
+				try {
+					keresesPanel.refresh();
+				} catch (SQLException e) {
+					Notification.show("Hiba a személynevek lekérdezése során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
+				}
 			}
 		});
-		addComponent(frissites);
-
-		Button torolOneletrajz = new Button("Kijelölt önéletrajz törlése");
+		hl.addComponent(frissites);
+		
+		Button kereses = new Button("Keresés...", new ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				keresesPanel.setVisible(!keresesPanel.isVisible());
+			}
+		});
+		hl.addComponent(kereses);
+		
+		Button torolOneletrajz = new Button("Kijelölt törlése...");
 		torolOneletrajz.addStyleName("danger");
 		torolOneletrajz.addClickListener(new ClickListener() {
 			@Override
@@ -148,8 +166,7 @@ public class MainMenuPanel extends HorizontalLayout {
 										c.commit();
 										ps.close();
 
-										getMembersListPanel().updateMembersList();
-										getMembersListPanel().setSelectedItem(null);
+										refresh(null);
 									} catch (SQLException e) {
 										Notification.show("Hiba az adat törlése során:\n" + e.getLocalizedMessage(),
 												Notification.Type.ERROR_MESSAGE);
@@ -159,8 +176,31 @@ public class MainMenuPanel extends HorizontalLayout {
 						});
 			}
 		});
+		hl.addComponent(torolOneletrajz);
+		hl.setComponentAlignment(torolOneletrajz, Alignment.MIDDLE_RIGHT);
+		hl.setExpandRatio(torolOneletrajz, 1f);
+		
+		try {
+			keresesPanel = new KeresesPanel(getMembersListPanel());
+			keresesPanel.setVisible(false);
+			addComponent(keresesPanel);
+		} catch (SQLException e) {
+			Notification.show("Hiba az adatok letöltése során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
+		}
+	}
 
-		addComponent(torolOneletrajz);
+	public KeresesPanel getKeresesPanel() {
+		return keresesPanel;
+	}
+	
+	public void refresh(Object selectedID) {
+		getMembersListPanel().updateMembersList();
+		getMembersListPanel().setSelectedItem(selectedID);
+		try {
+			keresesPanel.refresh();
+		} catch (SQLException e) {
+			Notification.show("Hiba a személynevek lekérdezése során:\n" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
+		}
 	}
 
 }

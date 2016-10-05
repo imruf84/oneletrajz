@@ -22,6 +22,7 @@ public abstract class MembersListPanel extends Panel {
 	 * Személyek alapadatait megjelenítõ táblázat.
 	 */
 	private Table membersTable;
+	private String filter = "";
 
 	/**
 	 * Konstruktor.
@@ -76,14 +77,20 @@ public abstract class MembersListPanel extends Panel {
 		membersTable.select(id);
 	}
 
+	public void setFilter(String filter) {
+		this.filter = filter;
+	}
+	
 	/**
 	 * Személyek listájának a frissítése.
+	 * 
+	 * @param filter szûrõ
 	 */
 	public final void updateMembersList() {
 
 		FreeformQuery query = new FreeformQuery(
-				"SELECT ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY, DECODE(LENGTH(FOTO), NULL, '', 'X') AS FOTO_VAN "
-						+ " FROM SZEMELYEK ORDER BY NEV",
+				"SELECT * FROM (SELECT ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY, DECODE(LENGTH(FOTO), NULL, '', 'X') AS FOTO_VAN "
+						+ " FROM SZEMELYEK) " + (filter.isEmpty() ? "" : " WHERE ") + filter + " ORDER BY NEV",
 				ConnectionManager.getConnectionPool(), "ID");
 		try {
 
@@ -105,7 +112,7 @@ public abstract class MembersListPanel extends Panel {
 					Notification.Type.ERROR_MESSAGE);
 		}
 	}
-
+	
 	/**
 	 * Táblázat sorára való dupla kattintás eseménye.
 	 * 
