@@ -32,6 +32,7 @@ import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.FormLayout;
@@ -40,6 +41,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.CheckBox;
 
 import oracle.sql.BLOB;
 
@@ -78,6 +80,7 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 	 * Személy fotóját megjelenító objektum.
 	 */
 	private Embedded fotoImg;
+	private CheckBox fotoTorolCB;
 
 	/**
 	 * Konstruktor.
@@ -167,13 +170,21 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 		}
 
+		HorizontalLayout fotoHL = new HorizontalLayout();
+		fotoHL.setSpacing(true);
+		fotoHL.setCaption("Fotó:");
+		fl.addComponent(fotoHL);
+		
 		ImageUploader iul = new ImageUploader();
-		fotoUL.setCaption("Fotó:");
 		fotoUL.setImmediate(true);
 		fotoUL.setReceiver(iul);
 		fotoUL.addSucceededListener(iul);
 		fotoUL.setButtonCaption("Kép kiválasztása...");
-		fl.addComponent(fotoUL);
+		fotoHL.addComponent(fotoUL);
+		
+		fotoTorolCB = new CheckBox("Töröl");
+		fotoHL.addComponent(fotoTorolCB);
+		fotoHL.setComponentAlignment(fotoTorolCB, Alignment.MIDDLE_CENTER);
 
 		vezetekNevTF = new TextField();
 		vezetekNevTF.setCaption("Vezetéknév:");
@@ -275,7 +286,7 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 		ps.setString(2, keresztNevTF.getValue());
 		ps.setString(3, szuletesiHely.getValue().toString());
 		ps.setString(4, new SimpleDateFormat("yyyy.MM.dd.").format(szuletesiIdo.getValue()));
-		if (fotoFile != null) {
+		if (fotoFile != null && !fotoTorolCB.getValue()) {
 			ps.setBinaryStream(5, new FileInputStream(fotoFile), (int) fotoFile.length());
 		} else {
 			ps.setNull(5, Types.BLOB);

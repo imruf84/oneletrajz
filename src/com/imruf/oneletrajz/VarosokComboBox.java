@@ -28,6 +28,16 @@ public class VarosokComboBox extends MyComboBox {
 		setNullSelectionAllowed(false);
 		setNewItemsAllowed(true);
 
+		refresh();
+	}
+
+	@Override
+	public void refresh() throws SQLException {
+		
+Object val = getValue();
+		
+		removeAllItems();
+		
 		Connection c = ConnectionManager.getConnection();
 		PreparedStatement ps = c.prepareStatement("SELECT * FROM VAROSOK ORDER BY NEV");
 		ResultSet rs = ps.executeQuery();
@@ -35,6 +45,10 @@ public class VarosokComboBox extends MyComboBox {
 			addItem(rs.getString(1));
 		}
 
+		rs.close();
 		ps.close();
+		
+		setValue(val);
+		
 	}
 }

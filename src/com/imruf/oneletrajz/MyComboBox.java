@@ -1,5 +1,7 @@
 package com.imruf.oneletrajz;
 
+import java.sql.SQLException;
+
 import com.vaadin.ui.ComboBox;
 
 /**
@@ -9,7 +11,7 @@ import com.vaadin.ui.ComboBox;
  * @author imruf84
  */
 @SuppressWarnings("serial")
-public class MyComboBox extends ComboBox {
+public abstract class MyComboBox extends ComboBox {
 	@Override
 	public void setValue(Object value) {
 
@@ -19,4 +21,6 @@ public class MyComboBox extends ComboBox {
 
 		super.setValue(value);
 	}
+	
+	public abstract void refresh() throws SQLException;
 }

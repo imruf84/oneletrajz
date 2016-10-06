@@ -91,9 +91,11 @@ public abstract class MembersListPanel extends Panel {
 		Object id = getSelectedId();
 		
 		FreeformQuery query = new FreeformQuery(
-				"SELECT * FROM (SELECT ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY, DECODE(LENGTH(FOTO), NULL, '', 'X') AS FOTO_VAN "
-						+ " FROM SZEMELYEK) " + (filter.isEmpty() ? "" : " WHERE ") + filter + " ORDER BY NEV",
+				"SELECT ID,NEV,SZULETESI_IDO,SZULETESI_HELY,FOTO_VAN FROM (SELECT SZEMELYEK.ID, VEZETEK_NEV||' '||KERESZT_NEV AS NEV, SZULETESI_IDO, SZULETESI_HELY, DECODE(LENGTH(FOTO), NULL, '', 'X') AS FOTO_VAN, NYELV, INTEZMENY "
+						+ " FROM SZEMELYEK LEFT JOIN NYELVTUDAS ON SZEMELYEK.ID=NYELVTUDAS.SZEMELY_ID LEFT JOIN TANULMANYOK ON SZEMELYEK.ID=TANULMANYOK.SZEMELY_ID) " + (filter.isEmpty() ? "" : " WHERE ") + filter 
+						+ " GROUP BY ID,NEV,SZULETESI_IDO,SZULETESI_HELY,FOTO_VAN ORDER BY NEV",
 				ConnectionManager.getConnectionPool(), "ID");
+		
 		try {
 
 			SQLContainer container = new SQLContainer(query);

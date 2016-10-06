@@ -165,6 +165,8 @@ public class MainMenuPanel extends VerticalLayout {
 										ps.executeQuery();
 										c.commit();
 										ps.close();
+										
+										getMembersListPanel().setSelectedItem(null);
 
 										refresh(null);
 									} catch (SQLException e) {
