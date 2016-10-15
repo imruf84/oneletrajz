@@ -31,7 +31,7 @@ public class ConnectionManager {
 	 */
 	public static void createConnection() throws SQLException {
 		pool = new SimpleJDBCConnectionPool("oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@localhost:1521:xe",
-				"ONELETRAJZ", "123456");
+				"ONELETRAJZ", "12345");
 		connection = pool.reserveConnection();
 	}
 
