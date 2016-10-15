@@ -1,0 +1,1 @@
+java -jar jetty-runner-8.1.9.v20130131.jar --port 8086 ONELETRAJZ.war
