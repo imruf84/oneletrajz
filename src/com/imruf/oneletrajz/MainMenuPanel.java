@@ -11,8 +11,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CssLayout;
 
 @SuppressWarnings("serial")
 public class MainMenuPanel extends VerticalLayout {
@@ -57,6 +59,10 @@ public class MainMenuPanel extends VerticalLayout {
 		hl.setWidth("100%");
 		
 		addComponent(hl);
+		
+		CssLayout bl = new CssLayout();
+		bl.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+		hl.addComponent(bl);
 
 		Button ujOneletrajz = new Button("Új létrehozása...");
 		ujOneletrajz.addClickListener(new ClickListener() {
@@ -81,7 +87,7 @@ public class MainMenuPanel extends VerticalLayout {
 
 			}
 		});
-		hl.addComponent(ujOneletrajz);
+		bl.addComponent(ujOneletrajz);
 
 		Button modositOneletrajz = new Button("Kijelölt módosítása...");
 		modositOneletrajz.addClickListener(new ClickListener() {
@@ -114,7 +120,7 @@ public class MainMenuPanel extends VerticalLayout {
 				};
 			}
 		});
-		hl.addComponent(modositOneletrajz);
+		bl.addComponent(modositOneletrajz);
 		
 		Button frissites = new Button("Lista frissítése", new ClickListener() {
 			@Override
@@ -127,7 +133,7 @@ public class MainMenuPanel extends VerticalLayout {
 				}
 			}
 		});
-		hl.addComponent(frissites);
+		bl.addComponent(frissites);
 		
 		Button kereses = new Button("Keresés...", new ClickListener() {
 			@Override
@@ -135,10 +141,10 @@ public class MainMenuPanel extends VerticalLayout {
 				keresesPanel.setVisible(!keresesPanel.isVisible());
 			}
 		});
-		hl.addComponent(kereses);
+		bl.addComponent(kereses);
 		
 		Button torolOneletrajz = new Button("Kijelölt törlése...");
-		torolOneletrajz.addStyleName("danger");
+		torolOneletrajz.addStyleName(ValoTheme.BUTTON_DANGER);
 		torolOneletrajz.addClickListener(new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {

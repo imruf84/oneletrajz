@@ -7,8 +7,10 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CssLayout;
 
 @SuppressWarnings("serial")
 public class KeresesPanel extends Panel {
@@ -56,6 +58,10 @@ public class KeresesPanel extends Panel {
 		mhl.setComponentAlignment(hl, Alignment.MIDDLE_RIGHT);
 		mhl.setExpandRatio(hl, 1f);
 		
+		CssLayout bl = new CssLayout();
+		bl.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+		hl.addComponent(bl);
+		
 		Button keresBtn = new Button("Keres", new ClickListener() {			
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -74,7 +80,7 @@ public class KeresesPanel extends Panel {
 				onUpdate(String.join(" AND ", filters));
 			}
 		});
-		hl.addComponent(keresBtn);
+		bl.addComponent(keresBtn);
 		
 		Button allBtn = new Button("Mind mutat", new ClickListener() {
 			@Override
@@ -87,7 +93,7 @@ public class KeresesPanel extends Panel {
 				onUpdate("");
 			}
 		});
-		hl.addComponent(allBtn);
+		bl.addComponent(allBtn);
 
 	}
 	

@@ -3,12 +3,14 @@ package com.imruf.oneletrajz;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
@@ -104,7 +106,8 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 		vl.addComponent(buttonsLayout);
 
 		Button okButton = new Button("Mentés");
-		okButton.addStyleName("primary");
+		okButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+		okButton.setClickShortcut(KeyCode.ENTER);
 		okButton.addClickListener(new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
