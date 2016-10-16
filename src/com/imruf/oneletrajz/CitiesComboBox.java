@@ -13,7 +13,7 @@ import com.vaadin.shared.ui.combobox.FilteringMode;
  * @author imruf84
  */
 @SuppressWarnings("serial")
-public class IntezmenyekComboBox extends MyComboBox {
+public class CitiesComboBox extends MyComboBox {
 
 	/**
 	 * Konstruktor.
@@ -21,8 +21,8 @@ public class IntezmenyekComboBox extends MyComboBox {
 	 * @throws SQLException
 	 *             kivétel
 	 */
-	public IntezmenyekComboBox() throws SQLException {
-		setCaption("Intézmény:");
+	public CitiesComboBox() throws SQLException {
+		setCaption("Város:");
 		setWidth("20em");
 		setFilteringMode(FilteringMode.CONTAINS);
 		setNullSelectionAllowed(false);
@@ -30,17 +30,16 @@ public class IntezmenyekComboBox extends MyComboBox {
 
 		refresh();
 	}
-	
+
 	@Override
 	public void refresh() throws SQLException {
 		
-		Object val = getValue();
+Object val = getValue();
 		
 		removeAllItems();
 		
 		Connection c = ConnectionManager.getConnection();
-		PreparedStatement ps = c.prepareStatement("SELECT DISTINCT INTEZMENY FROM TANULMANYOK ORDER BY INTEZMENY");			
-		
+		PreparedStatement ps = c.prepareStatement("SELECT * FROM VAROSOK ORDER BY NEV");
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 			addItem(rs.getString(1));
@@ -50,5 +49,6 @@ public class IntezmenyekComboBox extends MyComboBox {
 		ps.close();
 		
 		setValue(val);
+		
 	}
 }

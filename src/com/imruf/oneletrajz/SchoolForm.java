@@ -14,7 +14,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 
 @SuppressWarnings("serial")
-public class TanulmanyForm extends HorizontalLayout implements Validable, SQLInsertable, SQLUpdateable, SQLSelectable {
+public class SchoolForm extends HorizontalLayout implements Validable, SQLInsertable, SQLUpdateable, SQLSelectable {
 	
 	private final Object id;
 	private Object szemelyId;
@@ -23,7 +23,7 @@ public class TanulmanyForm extends HorizontalLayout implements Validable, SQLIns
 	private AbstractTextField intezmenyTF;
 	private CheckBox torolCB;
 	
-	public TanulmanyForm(Object id, Object szemelyId) throws SQLException {
+	public SchoolForm(Object id, Object szemelyId) throws SQLException {
 		this.id = id;
 		this.szemelyId = szemelyId;
 		

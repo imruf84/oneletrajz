@@ -8,34 +8,52 @@ import java.util.LinkedList;
 
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.themes.BaseTheme;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.themes.BaseTheme;
 
 @SuppressWarnings("serial")
-public class TanulmanyokPanel extends VerticalLayout implements Validable, SQLInsertable, SQLUpdateable, Closable, SQLSelectable {
-	
+public class KnownLanguagesPanel extends VerticalLayout implements Validable, SQLInsertable, SQLUpdateable, Closable, SQLSelectable {
+
+	/**
+	 * Személy azonosítója.
+	 */
 	private Object personID;
-	private final LinkedList<TanulmanyForm> tanulmanyForms = new LinkedList<>();
+	/**
+	 * Beszélt nyelvek ûrlapjainak tárolója.
+	 */
+	private final LinkedList<LanguageForm> nyelvForms = new LinkedList<>();
+	/**
+	 * Tároló.
+	 */
 	private VerticalLayout vl[];
 
-	public TanulmanyokPanel(Object personID) throws SQLException {
+	/**
+	 * Konstruktor.
+	 * 
+	 * @param personID személy azonosítója
+	 * @throws SQLException kivétel
+	 */
+	public KnownLanguagesPanel(Object personID) throws SQLException {
 		this.personID = personID;
 		initComponents();
 		getDataById();
 	}
 
+	/**
+	 * Komponensek inicializálása.
+	 */
 	private void initComponents() {
 		
-		setCaption("Tanulmányok");
+		setCaption("Nyelvtudás");
 		setMargin(true);
 		
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
-		String captions[] = {"Mettõl:", "Meddig:", "Intézmény:", "Töröl:"};
+		String captions[] = {"Nyelv:", "Töröl:"};
 		vl = new VerticalLayout[captions.length];
 		for (int i = 0; i < vl.length; i++) {
 			vl[i] = new VerticalLayout();
@@ -57,10 +75,15 @@ public class TanulmanyokPanel extends VerticalLayout implements Validable, SQLIn
 		addComponent(newRowButton);
 	}
 
+	/**
+	 * Személy azonosítójának a megadása.
+	 * 
+	 * @param personID személy azonosítója
+	 */
 	public void setPersonID(Object personID) {
 		this.personID = personID;
 		
-		for (TanulmanyForm tf : tanulmanyForms) {
+		for (LanguageForm tf : nyelvForms) {
 			tf.setPersonID(personID);
 		}
 	}
@@ -72,7 +95,7 @@ public class TanulmanyokPanel extends VerticalLayout implements Validable, SQLIn
 	@Override
 	public void toUpdate() throws SQLException, FileNotFoundException {
 		
-		for (TanulmanyForm tf : tanulmanyForms) {
+		for (LanguageForm tf : nyelvForms) {
 			tf.toUpdate();
 		}
 	}
@@ -85,7 +108,7 @@ public class TanulmanyokPanel extends VerticalLayout implements Validable, SQLIn
 	@Override
 	public Object toInsert() throws SQLException, FileNotFoundException {
 		
-		for (TanulmanyForm tf : tanulmanyForms) {
+		for (LanguageForm tf : nyelvForms) {
 			tf.toInsert();
 		}
 		
@@ -95,7 +118,7 @@ public class TanulmanyokPanel extends VerticalLayout implements Validable, SQLIn
 	@Override
 	public void afterInsert(Object newID) {
 		
-		for (TanulmanyForm tf : tanulmanyForms) {
+		for (LanguageForm tf : nyelvForms) {
 			tf.afterInsert(newID);
 		}
 		
@@ -105,22 +128,26 @@ public class TanulmanyokPanel extends VerticalLayout implements Validable, SQLIn
 	@Override
 	public boolean isValid() {
 		
-		for (TanulmanyForm tf : tanulmanyForms) {
+		for (LanguageForm tf : nyelvForms) {
 			if (!tf.isValid()) return false;
 		}
 		
 		return true;
 	}
 
+	/**
+	 * Új sor beszúrása.
+	 * 
+	 * @param id adott beszélt nyelv azonosítója
+	 * @throws SQLException kivétel
+	 */
 	private void addRow(Object id) throws SQLException {
 		
-		TanulmanyForm tf = new TanulmanyForm(id, personID);
-		vl[0].addComponent(tf.getMettolTF());
-		vl[1].addComponent(tf.getMeddigTF());
-		vl[2].addComponent(tf.getIntezmenyTF());
-		vl[3].addComponent(tf.getTorolCB());
-		vl[3].setComponentAlignment(tf.getTorolCB(), Alignment.MIDDLE_CENTER);
-		tanulmanyForms.add(tf);
+		LanguageForm tf = new LanguageForm(id, personID);
+		vl[0].addComponent(tf.getLanguageTF());
+		vl[1].addComponent(tf.getRemoveCB());
+		vl[1].setComponentAlignment(tf.getRemoveCB(), Alignment.MIDDLE_CENTER);
+		nyelvForms.add(tf);
 		
 		// Ablak középre igazítása a megnövekedett méret miatt.
 		Utils.centerWindows();
@@ -129,7 +156,7 @@ public class TanulmanyokPanel extends VerticalLayout implements Validable, SQLIn
 	@Override
 	public void getDataById() throws SQLException {
 		
-		PreparedStatement ps = ConnectionManager.getConnection().prepareStatement("SELECT ID FROM TANULMANYOK WHERE SZEMELY_ID=" + personID + " ORDER BY METTOL,MEDDIG");
+		PreparedStatement ps = ConnectionManager.getConnection().prepareStatement("SELECT ID FROM NYELVTUDAS WHERE SZEMELY_ID=" + personID + " ORDER BY NYELV");
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 			addRow(rs.getInt("ID"));
@@ -138,4 +165,5 @@ public class TanulmanyokPanel extends VerticalLayout implements Validable, SQLIn
 		ps.close();
 		
 	}
+	
 }

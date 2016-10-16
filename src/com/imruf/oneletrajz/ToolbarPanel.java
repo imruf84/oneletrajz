@@ -17,13 +17,13 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CssLayout;
 
 @SuppressWarnings("serial")
-public class MainMenuPanel extends VerticalLayout {
+public class ToolbarPanel extends VerticalLayout {
 
 	/**
 	 * Személyek alapadatait tartalmazó tároló.
 	 */
 	private final MembersListPanel membersPanel;
-	private KeresesPanel keresesPanel;
+	private FilterPanel keresesPanel;
 
 	/**
 	 * Konstruktor.
@@ -31,7 +31,7 @@ public class MainMenuPanel extends VerticalLayout {
 	 * @param mlp
 	 *            személyek alapadatait tároló objektum
 	 */
-	public MainMenuPanel(final MembersListPanel mlp) {
+	public ToolbarPanel(final MembersListPanel mlp) {
 		super();
 
 		this.membersPanel = mlp;
@@ -189,7 +189,7 @@ public class MainMenuPanel extends VerticalLayout {
 		hl.setExpandRatio(torolOneletrajz, 1f);
 		
 		try {
-			keresesPanel = new KeresesPanel(getMembersListPanel());
+			keresesPanel = new FilterPanel(getMembersListPanel());
 			keresesPanel.setVisible(false);
 			addComponent(keresesPanel);
 		} catch (SQLException e) {
@@ -197,7 +197,7 @@ public class MainMenuPanel extends VerticalLayout {
 		}
 	}
 
-	public KeresesPanel getKeresesPanel() {
+	public FilterPanel getKeresesPanel() {
 		return keresesPanel;
 	}
 	

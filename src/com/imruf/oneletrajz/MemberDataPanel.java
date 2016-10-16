@@ -46,8 +46,11 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 	/**
 	 * Tanulmányok tárolója.
 	 */
-	private TanulmanyokPanel tanulmanyokPanel;
-	private NyelvtudasPanel nyelvtudasPanel;
+	private SchoolsPanel tanulmanyokPanel;
+	/**
+	 * Nyelvtudás tárolója.
+	 */
+	private KnownLanguagesPanel nyelvtudasPanel;
 
 	/**
 	 * Konstruktor.
@@ -90,11 +93,11 @@ public abstract class MemberDataPanel extends Panel implements SQLInsertable, SQ
 			vl.addComponent(ts);
 			
 			// Tanulmányok.
-			tanulmanyokPanel = new TanulmanyokPanel(getMemberId());
+			tanulmanyokPanel = new SchoolsPanel(getMemberId());
 			ts.addComponent(tanulmanyokPanel);
 			
 			// Nyelvtudás.
-			nyelvtudasPanel = new NyelvtudasPanel(getMemberId());
+			nyelvtudasPanel = new KnownLanguagesPanel(getMemberId());
 			ts.addComponent(nyelvtudasPanel);
 			
 		} catch (SQLException e) {

@@ -8,21 +8,21 @@ import java.util.LinkedList;
 
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 
 @SuppressWarnings("serial")
-public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLInsertable, SQLUpdateable, Closable, SQLSelectable {
-
+public class SchoolsPanel extends VerticalLayout implements Validable, SQLInsertable, SQLUpdateable, Closable, SQLSelectable {
+	
 	private Object personID;
-	private final LinkedList<NyelvForm> nyelvForms = new LinkedList<>();
+	private final LinkedList<SchoolForm> tanulmanyForms = new LinkedList<>();
 	private VerticalLayout vl[];
 
-	public NyelvtudasPanel(Object personID) throws SQLException {
+	public SchoolsPanel(Object personID) throws SQLException {
 		this.personID = personID;
 		initComponents();
 		getDataById();
@@ -30,12 +30,12 @@ public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLIns
 
 	private void initComponents() {
 		
-		setCaption("Nyelvtudás");
+		setCaption("Tanulmányok");
 		setMargin(true);
 		
 		HorizontalLayout hl = new HorizontalLayout();
 		hl.setSpacing(true);
-		String captions[] = {"Nyelv:", "Töröl:"};
+		String captions[] = {"Mettõl:", "Meddig:", "Intézmény:", "Töröl:"};
 		vl = new VerticalLayout[captions.length];
 		for (int i = 0; i < vl.length; i++) {
 			vl[i] = new VerticalLayout();
@@ -60,7 +60,7 @@ public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLIns
 	public void setPersonID(Object personID) {
 		this.personID = personID;
 		
-		for (NyelvForm tf : nyelvForms) {
+		for (SchoolForm tf : tanulmanyForms) {
 			tf.setPersonID(personID);
 		}
 	}
@@ -72,7 +72,7 @@ public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLIns
 	@Override
 	public void toUpdate() throws SQLException, FileNotFoundException {
 		
-		for (NyelvForm tf : nyelvForms) {
+		for (SchoolForm tf : tanulmanyForms) {
 			tf.toUpdate();
 		}
 	}
@@ -85,7 +85,7 @@ public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLIns
 	@Override
 	public Object toInsert() throws SQLException, FileNotFoundException {
 		
-		for (NyelvForm tf : nyelvForms) {
+		for (SchoolForm tf : tanulmanyForms) {
 			tf.toInsert();
 		}
 		
@@ -95,7 +95,7 @@ public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLIns
 	@Override
 	public void afterInsert(Object newID) {
 		
-		for (NyelvForm tf : nyelvForms) {
+		for (SchoolForm tf : tanulmanyForms) {
 			tf.afterInsert(newID);
 		}
 		
@@ -105,7 +105,7 @@ public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLIns
 	@Override
 	public boolean isValid() {
 		
-		for (NyelvForm tf : nyelvForms) {
+		for (SchoolForm tf : tanulmanyForms) {
 			if (!tf.isValid()) return false;
 		}
 		
@@ -114,11 +114,13 @@ public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLIns
 
 	private void addRow(Object id) throws SQLException {
 		
-		NyelvForm tf = new NyelvForm(id, personID);
-		vl[0].addComponent(tf.getNyelvTF());
-		vl[1].addComponent(tf.getTorolCB());
-		vl[1].setComponentAlignment(tf.getTorolCB(), Alignment.MIDDLE_CENTER);
-		nyelvForms.add(tf);
+		SchoolForm tf = new SchoolForm(id, personID);
+		vl[0].addComponent(tf.getMettolTF());
+		vl[1].addComponent(tf.getMeddigTF());
+		vl[2].addComponent(tf.getIntezmenyTF());
+		vl[3].addComponent(tf.getTorolCB());
+		vl[3].setComponentAlignment(tf.getTorolCB(), Alignment.MIDDLE_CENTER);
+		tanulmanyForms.add(tf);
 		
 		// Ablak középre igazítása a megnövekedett méret miatt.
 		Utils.centerWindows();
@@ -127,7 +129,7 @@ public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLIns
 	@Override
 	public void getDataById() throws SQLException {
 		
-		PreparedStatement ps = ConnectionManager.getConnection().prepareStatement("SELECT ID FROM NYELVTUDAS WHERE SZEMELY_ID=" + personID + " ORDER BY NYELV");
+		PreparedStatement ps = ConnectionManager.getConnection().prepareStatement("SELECT ID FROM TANULMANYOK WHERE SZEMELY_ID=" + personID + " ORDER BY METTOL,MEDDIG");
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 			addRow(rs.getInt("ID"));
@@ -136,5 +138,4 @@ public class NyelvtudasPanel extends VerticalLayout implements Validable, SQLIns
 		ps.close();
 		
 	}
-	
 }

@@ -13,7 +13,7 @@ import com.vaadin.shared.ui.combobox.FilteringMode;
  * @author imruf84
  */
 @SuppressWarnings("serial")
-public class SzemelyekComboBox extends MyComboBox {
+public class MembersComboBox extends MyComboBox {
 
 	/**
 	 * Konstruktor.
@@ -21,7 +21,7 @@ public class SzemelyekComboBox extends MyComboBox {
 	 * @throws SQLException
 	 *             kivétel
 	 */
-	public SzemelyekComboBox() throws SQLException {
+	public MembersComboBox() throws SQLException {
 		setCaption("Név:");
 		setWidth("20em");
 		setFilteringMode(FilteringMode.CONTAINS);

@@ -9,41 +9,61 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
 
 @SuppressWarnings("serial")
-public class NyelvForm extends HorizontalLayout implements Validable, SQLInsertable, SQLUpdateable, SQLSelectable {
+public class LanguageForm extends HorizontalLayout implements Validable, SQLInsertable, SQLUpdateable, SQLSelectable {
 
+	/**
+	 * Beszélt nyelv azonosítója.
+	 */
 	private final Object id;
-	private Object szemelyId;
-	private NyelvekComboBox nyelvCB;
-	private CheckBox torolCB;
+	/**
+	 * Személy azonosítója.
+	 */
+	private Object memberId;
+	/**
+	 * Nyelv.
+	 */
+	private LanguagesComboBox languageCB;
+	/**
+	 * Törlés jelölõje.
+	 */
+	private CheckBox removeCB;
 	
-	public NyelvForm(Object id, Object szemelyId) throws SQLException {
+	/**
+	 * Konstruktor.
+	 * 
+	 * @param id beszélt nyelv azonosítója
+	 * @param memberId személy azonosítója
+	 * @throws SQLException kivétel
+	 */
+	public LanguageForm(Object id, Object memberId) throws SQLException {
 		this.id = id;
-		this.szemelyId = szemelyId;
+		this.memberId = memberId;
 		
 		initComponents();
 	}
 
+	/**
+	 * Komponensek inicializálása.
+	 * 
+	 * @throws SQLException kivétel
+	 */
 	private void initComponents() throws SQLException {
 		
 		setSpacing(true);
 		
-		nyelvCB = new NyelvekComboBox(false);
-		nyelvCB.setCaption(null);
-		/*nyelvTF.setMaxLength(10);
-		nyelvTF.setWidth("10em");
-		nyelvTF.addValidator(new StringLengthValidator("Nyelv megadása kötelezõ!", 1, 10, false));
-		nyelvTF.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ]{1,10}", true, "Nyelv formátuma nem megfelelõ!"));*/
-		addComponent(nyelvCB);
+		languageCB = new LanguagesComboBox(false);
+		languageCB.setCaption(null);
+		addComponent(languageCB);
 		
-		torolCB = new CheckBox();
-		addComponent(torolCB);
+		removeCB = new CheckBox();
+		addComponent(removeCB);
 		
 		getDataById();
 	}
 
 	@Override
 	public boolean isValid() {
-		return nyelvCB.isValid();
+		return languageCB.isValid();
 	}
 
 	@Override
@@ -51,8 +71,8 @@ public class NyelvForm extends HorizontalLayout implements Validable, SQLInserta
 		
 		Connection c = ConnectionManager.getConnection();
 
-		boolean toDelete = torolCB.getValue();
-		boolean hasId = null != id;
+		boolean toDelete = removeCB.getValue();
+		boolean hasId = (null != id);
 		
 		// Ha nincs még az adat tárolva az adatbázisban és törölni szeretnénk, akkor kilépünk.
 		if (!hasId && toDelete) return null;
@@ -79,8 +99,8 @@ public class NyelvForm extends HorizontalLayout implements Validable, SQLInserta
 		}
 
 		// Paraméterek megadása.
-		ps.setInt(1, Integer.parseInt(szemelyId.toString()));
-		ps.setString(2, nyelvCB.getValue().toString());
+		ps.setInt(1, Integer.parseInt(memberId.toString()));
+		ps.setString(2, languageCB.getValue().toString());
 
 		ps.executeUpdate();
 		c.commit();
@@ -109,22 +129,37 @@ public class NyelvForm extends HorizontalLayout implements Validable, SQLInserta
 		PreparedStatement ps = ConnectionManager.getConnection().prepareStatement("SELECT NYELV FROM NYELVTUDAS WHERE ID=" + id);
 		ResultSet rs = ps.executeQuery();
 		if (rs.next()) {
-			nyelvCB.setValue(rs.getString("NYELV"));
+			languageCB.setValue(rs.getString("NYELV"));
 		}
 		rs.close();
 		ps.close();
 	}
 
-	public NyelvekComboBox getNyelvTF() {
-		return nyelvCB;
+	/**
+	 * Nyelvek listájának a lekérdezése.
+	 * 
+	 * @return nyelvek listája
+	 */
+	public LanguagesComboBox getLanguageTF() {
+		return languageCB;
 	}
 
-	public CheckBox getTorolCB() {
-		return torolCB;
+	/**
+	 * Törlés jelölõjének a lekérdezése.
+	 * 
+	 * @return törlés jelölõje
+	 */
+	public CheckBox getRemoveCB() {
+		return removeCB;
 	}
 
+	/**
+	 * Személy azonosítójának a megadása.
+	 * 
+	 * @param personID személy azonosítója
+	 */
 	public void setPersonID(Object personID) {
-		this.szemelyId = personID;
+		this.memberId = personID;
 	}
 	
 }

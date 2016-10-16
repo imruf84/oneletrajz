@@ -8,13 +8,16 @@ import java.sql.SQLException;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 
 /**
- * Városok neveit tartalmazó legördülõ lista.
+ * Nyelvek neveit tartalmazó legördülõ lista.
  * 
  * @author imruf84
  */
 @SuppressWarnings("serial")
-public class NyelvekComboBox extends MyComboBox {
+public class LanguagesComboBox extends MyComboBox {
 
+	/**
+	 * Igaz esetén csak az adatbázisban tárolt nyelvek jelennek meg.
+	 */
 	private boolean onlyStored;
 
 	/**
@@ -23,7 +26,8 @@ public class NyelvekComboBox extends MyComboBox {
 	 * @throws SQLException
 	 *             kivétel
 	 */
-	public NyelvekComboBox(boolean onlyStored) throws SQLException {
+	public LanguagesComboBox(boolean onlyStored) throws SQLException {
+		
 		this.onlyStored = onlyStored;
 		setCaption("Nyelv:");
 		setWidth("10em");

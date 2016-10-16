@@ -55,19 +55,19 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 	/**
 	 * Vezetéknév beviteli mezõje.
 	 */
-	private TextField vezetekNevTF;
+	private TextField firstNameTF;
 	/**
 	 * Keresztnév beviteli mezõje.
 	 */
-	private TextField keresztNevTF;
+	private TextField lastNameTF;
 	/**
 	 * Születési hely beviteli mezõje.
 	 */
-	private VarosokComboBox szuletesiHely;
+	private CitiesComboBox placeOfBirth;
 	/**
 	 * Születési idõ dátumválasztója.
 	 */
-	private DateField szuletesiIdo;
+	private DateField dateOfBirth;
 	/**
 	 * Aktuális személy azonosítója.
 	 */
@@ -75,12 +75,15 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 	/**
 	 * Személy fotóját tartalmazó fájl.
 	 */
-	private File fotoFile = null;
+	private File photoFile = null;
 	/**
 	 * Személy fotóját megjelenító objektum.
 	 */
-	private Embedded fotoImg;
-	private CheckBox fotoTorolCB;
+	private Embedded photoImg;
+	/**
+	 * Kép törlésének a jelölõje.
+	 */
+	private CheckBox photoRemoveCB;
 
 	/**
 	 * Konstruktor.
@@ -106,15 +109,15 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 		FormLayout fl = new FormLayout();
 		addComponent(fl);
 
-		fotoImg = new Embedded();
-		fotoImg.setWidth("100px");
-		fotoImg.setHeight("150px");
+		photoImg = new Embedded();
+		photoImg.setWidth("100px");
+		photoImg.setHeight("150px");
 		VerticalLayout vl = new VerticalLayout();
 		vl.setMargin(true);
 		addComponent(vl);
-		vl.addComponent(fotoImg);
+		vl.addComponent(photoImg);
 
-		Upload fotoUL = new Upload();
+		Upload photoUL = new Upload();
 
 		class ImageUploader implements Receiver, SucceededListener {
 
@@ -124,7 +127,7 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 				if (!mimeType.toLowerCase().endsWith("jpeg")) {
 					Notification.show("Kizárólag jpeg kiterjesztésû fájlok tölthetõek fel!",
 							Notification.Type.ERROR_MESSAGE);
-					fotoUL.interruptUpload();
+					photoUL.interruptUpload();
 					return new NullOutputStream();
 				}
 
@@ -132,8 +135,8 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 					// TODO: már létezõ fájl esetén a fájlnév léptetése, vagy
 					// egyedi mappába rakása
-					fotoFile = new File(generatePhotoFileName());
-					return new FileOutputStream(fotoFile);
+					photoFile = new File(generatePhotoFileName());
+					return new FileOutputStream(photoFile);
 				} catch (final java.io.FileNotFoundException e) {
 					Notification.show("Hiba a kép feltöltése során:\n" + e.getLocalizedMessage(),
 							Notification.Type.ERROR_MESSAGE);
@@ -148,7 +151,7 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 				try {
 					int w = 100;
 					int h = 150;
-					BufferedImage bi = ImageIO.read(fotoFile);
+					BufferedImage bi = ImageIO.read(photoFile);
 					bi = Scalr.resize(bi, Method.ULTRA_QUALITY, Mode.AUTOMATIC, w, h);
 
 					BufferedImage bi2 = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
@@ -158,8 +161,8 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 					bg.fillRect(0, 0, w, h);
 					bg.drawImage(bi, Math.abs((bi.getWidth() - w) / 2), Math.abs((bi.getHeight() - h) / 2), null);
 					bg.dispose();
-					ImageIO.write(bi2, "jpg", fotoFile);
-					fotoImg.setSource(new FileResource(fotoFile));
+					ImageIO.write(bi2, "jpg", photoFile);
+					photoImg.setSource(new FileResource(photoFile));
 
 				} catch (IOException e) {
 					Notification.show("Hiba a kép feltöltése során:\n" + e.getLocalizedMessage(),
@@ -170,57 +173,57 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 		}
 
-		HorizontalLayout fotoHL = new HorizontalLayout();
-		fotoHL.setSpacing(true);
-		fotoHL.setCaption("Fotó:");
-		fl.addComponent(fotoHL);
+		HorizontalLayout photoHL = new HorizontalLayout();
+		photoHL.setSpacing(true);
+		photoHL.setCaption("Fotó:");
+		fl.addComponent(photoHL);
 		
 		ImageUploader iul = new ImageUploader();
-		fotoUL.setImmediate(true);
-		fotoUL.setReceiver(iul);
-		fotoUL.addSucceededListener(iul);
-		fotoUL.setButtonCaption("Kép kiválasztása...");
-		fotoHL.addComponent(fotoUL);
+		photoUL.setImmediate(true);
+		photoUL.setReceiver(iul);
+		photoUL.addSucceededListener(iul);
+		photoUL.setButtonCaption("Kép kiválasztása...");
+		photoHL.addComponent(photoUL);
 		
-		fotoTorolCB = new CheckBox("Töröl");
-		fotoHL.addComponent(fotoTorolCB);
-		fotoHL.setComponentAlignment(fotoTorolCB, Alignment.MIDDLE_CENTER);
+		photoRemoveCB = new CheckBox("Töröl");
+		photoHL.addComponent(photoRemoveCB);
+		photoHL.setComponentAlignment(photoRemoveCB, Alignment.MIDDLE_CENTER);
 
-		vezetekNevTF = new TextField();
-		vezetekNevTF.setCaption("Vezetéknév:");
-		vezetekNevTF.setMaxLength(20);
-		vezetekNevTF.setRequired(true);
-		vezetekNevTF.setRequiredError("Vezetéknév megadása kötelezõ!");
-		vezetekNevTF.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ \\-.]{1,20}", true,
+		firstNameTF = new TextField();
+		firstNameTF.setCaption("Vezetéknév:");
+		firstNameTF.setMaxLength(20);
+		firstNameTF.setRequired(true);
+		firstNameTF.setRequiredError("Vezetéknév megadása kötelezõ!");
+		firstNameTF.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ \\-.]{1,20}", true,
 				"Vezetéknév formátuma nem megfelelõ!"));
-		vezetekNevTF.setWidth("20em");
-		fl.addComponent(vezetekNevTF);
+		firstNameTF.setWidth("20em");
+		fl.addComponent(firstNameTF);
 
-		keresztNevTF = new TextField();
-		keresztNevTF.setCaption("Keresztnév:");
-		keresztNevTF.setMaxLength(20);
-		keresztNevTF.setRequired(true);
-		keresztNevTF.setRequiredError("Keresztnév megadása kötelezõ!");
-		keresztNevTF.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ \\-.]{1,20}", true,
+		lastNameTF = new TextField();
+		lastNameTF.setCaption("Keresztnév:");
+		lastNameTF.setMaxLength(20);
+		lastNameTF.setRequired(true);
+		lastNameTF.setRequiredError("Keresztnév megadása kötelezõ!");
+		lastNameTF.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ \\-.]{1,20}", true,
 				"Keresztnév formátuma nem megfelelõ!"));
-		keresztNevTF.setWidth("20em");
-		fl.addComponent(keresztNevTF);
+		lastNameTF.setWidth("20em");
+		fl.addComponent(lastNameTF);
 
-		szuletesiHely = new VarosokComboBox();
-		szuletesiHely.setCaption("Születési hely:");
-		szuletesiHely.setNullSelectionAllowed(false);
-		szuletesiHely.setRequired(true);
-		szuletesiHely.setRequiredError("Születési hely megadása kötelezõ!");
-		szuletesiHely.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ]{1,30}", true,
+		placeOfBirth = new CitiesComboBox();
+		placeOfBirth.setCaption("Születési hely:");
+		placeOfBirth.setNullSelectionAllowed(false);
+		placeOfBirth.setRequired(true);
+		placeOfBirth.setRequiredError("Születési hely megadása kötelezõ!");
+		placeOfBirth.addValidator(new RegexpValidator("[a-zA-ZöüóõúéáûíÖÜÓÕÚÉÁÛÍ]{1,30}", true,
 				"Születési hely formátuma nem megfelelõ!"));
-		fl.addComponent(szuletesiHely);
+		fl.addComponent(placeOfBirth);
 
-		szuletesiIdo = new DateField();
-		szuletesiIdo.setCaption("Születési idõ:");
-		szuletesiIdo.setRequired(true);
-		szuletesiIdo.setRequiredError("Születési idõ megadása kötelezõ!");
-		szuletesiIdo.addValidator(new NullValidator("Születési idõ megadása kötelezõ!", false));
-		fl.addComponent(szuletesiIdo);
+		dateOfBirth = new DateField();
+		dateOfBirth.setCaption("Születési idõ:");
+		dateOfBirth.setRequired(true);
+		dateOfBirth.setRequiredError("Születési idõ megadása kötelezõ!");
+		dateOfBirth.addValidator(new NullValidator("Születési idõ megadása kötelezõ!", false));
+		fl.addComponent(dateOfBirth);
 
 		// Azonosító esetén kitöltjük adatokkal az ûrlapot.
 		getDataById();
@@ -248,19 +251,19 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 		Item data = container.getItem(ConnectionManager.objectToRowId(id));
 
 		// Adatok megjelenítése.
-		vezetekNevTF.setValue((String) data.getItemProperty("VEZETEK_NEV").getValue());
-		keresztNevTF.setValue((String) data.getItemProperty("KERESZT_NEV").getValue());
-		szuletesiHely.setValue((String) data.getItemProperty("SZULETESI_HELY").getValue());
+		firstNameTF.setValue((String) data.getItemProperty("VEZETEK_NEV").getValue());
+		lastNameTF.setValue((String) data.getItemProperty("KERESZT_NEV").getValue());
+		placeOfBirth.setValue((String) data.getItemProperty("SZULETESI_HELY").getValue());
 		try {
-			szuletesiIdo.setValue(new SimpleDateFormat("yyyy.MM.dd.")
+			dateOfBirth.setValue(new SimpleDateFormat("yyyy.MM.dd.")
 					.parse(((String) data.getItemProperty("SZULETESI_IDO").getValue())));
 
 			BLOB image = (BLOB) data.getItemProperty("FOTO").getValue();
 			if (null != image) {
 				BufferedImage bi = ImageIO.read(image.getBinaryStream());
-				fotoFile = new File(generatePhotoFileName());
-				ImageIO.write(bi, "jpg", fotoFile);
-				fotoImg.setSource(new FileResource(fotoFile));
+				photoFile = new File(generatePhotoFileName());
+				ImageIO.write(bi, "jpg", photoFile);
+				photoImg.setSource(new FileResource(photoFile));
 			}
 		} catch (ReadOnlyException | ConversionException | ParseException | IOException e) {
 		}
@@ -269,7 +272,7 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 	@Override
 	public boolean isValid() {
-		return vezetekNevTF.isValid() && keresztNevTF.isValid() && szuletesiHely.isValid() && szuletesiIdo.isValid();
+		return firstNameTF.isValid() && lastNameTF.isValid() && placeOfBirth.isValid() && dateOfBirth.isValid();
 	}
 
 	@Override
@@ -282,12 +285,12 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 				"UPDATE SZEMELYEK SET VEZETEK_NEV=?,KERESZT_NEV=?,SZULETESI_HELY=?,SZULETESI_IDO=?,FOTO=? WHERE ID="
 						+ id);
 
-		ps.setString(1, vezetekNevTF.getValue());
-		ps.setString(2, keresztNevTF.getValue());
-		ps.setString(3, szuletesiHely.getValue().toString());
-		ps.setString(4, new SimpleDateFormat("yyyy.MM.dd.").format(szuletesiIdo.getValue()));
-		if (fotoFile != null && !fotoTorolCB.getValue()) {
-			ps.setBinaryStream(5, new FileInputStream(fotoFile), (int) fotoFile.length());
+		ps.setString(1, firstNameTF.getValue());
+		ps.setString(2, lastNameTF.getValue());
+		ps.setString(3, placeOfBirth.getValue().toString());
+		ps.setString(4, new SimpleDateFormat("yyyy.MM.dd.").format(dateOfBirth.getValue()));
+		if (photoFile != null && !photoRemoveCB.getValue()) {
+			ps.setBinaryStream(5, new FileInputStream(photoFile), (int) photoFile.length());
 		} else {
 			ps.setNull(5, Types.BLOB);
 		}
@@ -312,12 +315,12 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 				"INSERT INTO SZEMELYEK (VEZETEK_NEV,KERESZT_NEV,SZULETESI_HELY,SZULETESI_IDO,FOTO) VALUES (?,?,?,?,?)",
 				new String[] { "ID" });
 
-		ps.setString(1, vezetekNevTF.getValue());
-		ps.setString(2, keresztNevTF.getValue());
-		ps.setString(3, szuletesiHely.getValue().toString());
-		ps.setString(4, new SimpleDateFormat("yyyy.MM.dd.").format(szuletesiIdo.getValue()));
-		if (fotoFile != null) {
-			ps.setBinaryStream(5, new FileInputStream(fotoFile), (int) fotoFile.length());
+		ps.setString(1, firstNameTF.getValue());
+		ps.setString(2, lastNameTF.getValue());
+		ps.setString(3, placeOfBirth.getValue().toString());
+		ps.setString(4, new SimpleDateFormat("yyyy.MM.dd.").format(dateOfBirth.getValue()));
+		if (photoFile != null) {
+			ps.setBinaryStream(5, new FileInputStream(photoFile), (int) photoFile.length());
 		} else {
 			ps.setNull(5, Types.BLOB);
 		}
@@ -338,9 +341,9 @@ public class PersonalDataForm extends HorizontalLayout implements Validable, SQL
 
 	@Override
 	public void onClose() {
-		if (fotoFile != null) {
-			if (fotoFile.exists()) {
-				fotoFile.delete();
+		if (photoFile != null) {
+			if (photoFile.exists()) {
+				photoFile.delete();
 			}
 		}
 	}
